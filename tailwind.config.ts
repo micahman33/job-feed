@@ -22,6 +22,20 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          hover: "hsl(var(--primary-hover))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        "job-card": {
+          DEFAULT: "hsl(var(--job-card))",
+          hover: "hsl(var(--job-card-hover))",
+        },
+        salary: "hsl(var(--salary))",
+        "benefit-tag": {
+          DEFAULT: "hsl(var(--benefit-tag))",
+          foreground: "hsl(var(--benefit-tag-foreground))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
