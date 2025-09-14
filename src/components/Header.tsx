@@ -1,9 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Briefcase } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Header = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
 
   const navItems = [
     { name: "Home", path: "/", active: true },
@@ -20,7 +24,7 @@ const Header = () => {
             <div className="bg-primary p-2 rounded-lg">
               <Briefcase className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold text-foreground">JobSeeker</span>
+            <span className="text-xl font-bold text-foreground">Jobs Feed</span>
           </Link>
           
           <nav className="hidden md:flex items-center space-x-1">
@@ -38,17 +42,57 @@ const Header = () => {
                 ) : (
                   <Button 
                     variant="ghost" 
-                    className="text-sm font-medium text-muted-foreground cursor-not-allowed opacity-50"
-                    disabled
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+                    onClick={() => {
+                      // These are placeholder links - they don't go anywhere yet
+                      toast({
+                        title: "Coming Soon!",
+                        description: `${item.name} feature is coming soon.`,
+                      });
+                    }}
                   >
                     {item.name}
                   </Button>
                 )}
               </div>
             ))}
+            
+            {user ? (
+              <div className="flex items-center space-x-2 ml-4">
+                <span className="text-sm text-muted-foreground">
+                  Welcome, {user.email?.split('@')[0]}
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={signOut}
+                >
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Link to="/auth" className="ml-4">
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </nav>
           
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
+            {user ? (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={signOut}
+              >
+                Sign Out
+              </Button>
+            ) : (
+              <Link to="/auth">
+                <Button size="sm" variant="ghost">Sign In</Button>
+              </Link>
+            )}
             <Link to="/post-job">
               <Button size="sm">Post Job</Button>
             </Link>

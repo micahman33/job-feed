@@ -7,13 +7,16 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AVAILABLE_BENEFITS, Job } from "@/types/job";
+import { AVAILABLE_BENEFITS } from "@/types/job";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Building2, MapPin, DollarSign, FileText, Award } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const PostJob = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const [formData, setFormData] = useState({
     title: "",
@@ -26,6 +29,7 @@ const PostJob = () => {
     benefits: [] as string[],
     companyLogo: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -43,7 +47,7 @@ const PostJob = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -58,41 +62,76 @@ const PostJob = () => {
       return;
     }
 
-    // Create new job
-    const newJob: Job = {
-      id: Date.now().toString(),
-      title: formData.title,
-      company: formData.company,
-      location: formData.location,
-      salaryMin: parseInt(formData.salaryMin),
-      salaryMax: parseInt(formData.salaryMax),
-      type: formData.type,
-      description: formData.description,
-      benefits: formData.benefits,
-      postedDate: new Date(),
-      companyLogo: formData.companyLogo || undefined
-    };
+    setIsSubmitting(true);
 
-    // Save to localStorage
-    const existingJobs = JSON.parse(localStorage.getItem('jobPosts') || '[]');
-    existingJobs.push(newJob);
-    localStorage.setItem('jobPosts', JSON.stringify(existingJobs));
+    try {
+      if (user) {
+        // User is authenticated, save to Supabase
+        const { error } = await supabase
+          .from('jobs')
+          .insert({
+            title: formData.title,
+            company: formData.company,
+            location: formData.location,
+            salary_min: parseInt(formData.salaryMin),
+            salary_max: parseInt(formData.salaryMax),
+            job_type: formData.type,
+            description: formData.description,
+            benefits: formData.benefits,
+            company_logo: formData.companyLogo || null,
+            user_id: user.id
+          });
 
-    toast({
-      title: "Job Posted Successfully!",
-      description: "Your job posting is now live and visible to job seekers.",
-    });
+        if (error) {
+          throw error;
+        }
 
-    // Navigate back to home
-    navigate('/');
+        toast({
+          title: "Job Posted Successfully!",
+          description: "Your job posting is now live and visible to job seekers.",
+        });
+      } else {
+        // User not authenticated, save to localStorage
+        const newJob = {
+          id: Date.now().toString(),
+          title: formData.title,
+          company: formData.company,
+          location: formData.location,
+          salary_min: parseInt(formData.salaryMin),
+          salary_max: parseInt(formData.salaryMax),
+          job_type: formData.type,
+          description: formData.description,
+          benefits: formData.benefits,
+          created_at: new Date().toISOString(),
+          company_logo: formData.companyLogo || null
+        };
+
+        const existingJobs = JSON.parse(localStorage.getItem('jobPosts') || '[]');
+        existingJobs.push(newJob);
+        localStorage.setItem('jobPosts', JSON.stringify(existingJobs));
+
+        toast({
+          title: "Job Posted Successfully!",
+          description: "Your job posting is now live and visible to job seekers.",
+        });
+      }
+
+      // Navigate back to home
+      navigate('/');
+    } catch (error: any) {
+      console.error('Error posting job:', error);
+      toast({
+        title: "Error Posting Job",
+        description: error.message || "There was an error posting your job. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const companyLogos = [
-    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=64&h=64&fit=crop&crop=center",
-    "https://images.unsplash.com/photo-1549923746-c502d488b3ea?w=64&h=64&fit=crop&crop=center", 
-    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=64&h=64&fit=crop&crop=center",
-    "https://images.unsplash.com/photo-1558655146-364adaf25c24?w=64&h=64&fit=crop&crop=center",
-    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=64&h=64&fit=crop&crop=center"
+    "🚀", "💡", "🎨", "📊", "🎯", "☁️", "📈", "💼", "🔧", "🌟", "💻", "📱"
   ];
 
   return (
@@ -103,6 +142,20 @@ const PostJob = () => {
           <p className="text-muted-foreground">
             Fill out the form below to post your job and reach thousands of qualified candidates.
           </p>
+          {!user && (
+            <div className="mt-4 p-4 bg-accent rounded-lg">
+              <p className="text-sm text-accent-foreground">
+                💡 <strong>Tip:</strong> Sign in to manage your job postings and track applications.{" "}
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-primary"
+                  onClick={() => navigate('/auth')}
+                >
+                  Sign in here
+                </Button>
+              </p>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -265,17 +318,17 @@ const PostJob = () => {
             </CardHeader>
             <CardContent>
               <div>
-                <Label>Select a logo or provide URL</Label>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 mb-4">
+                <Label>Select an emoji or provide URL</Label>
+                <div className="grid grid-cols-6 md:grid-cols-12 gap-2 mt-2 mb-4">
                   {companyLogos.map((logo, index) => (
                     <div
                       key={index}
-                      className={`relative cursor-pointer rounded-lg border-2 p-2 ${
-                        formData.companyLogo === logo ? 'border-primary' : 'border-border'
+                      className={`relative cursor-pointer rounded-lg border-2 p-3 text-center text-2xl ${
+                        formData.companyLogo === logo ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                       }`}
                       onClick={() => handleInputChange('companyLogo', logo)}
                     >
-                      <img src={logo} alt={`Logo ${index + 1}`} className="w-full h-12 object-cover rounded" />
+                      {logo}
                     </div>
                   ))}
                 </div>
@@ -293,13 +346,15 @@ const PostJob = () => {
             <Button 
               type="submit" 
               className="bg-primary hover:bg-primary-hover text-primary-foreground px-8"
+              disabled={isSubmitting}
             >
-              Post Job
+              {isSubmitting ? "Posting Job..." : "Post Job"}
             </Button>
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => navigate('/')}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>

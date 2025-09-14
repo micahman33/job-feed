@@ -46,9 +46,9 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
               <span className="font-medium">{job.company}</span>
             </div>
           </div>
-          {job.companyLogo && (
+          {job.company_logo && (
             <img 
-              src={job.companyLogo} 
+              src={job.company_logo} 
               alt={`${job.company} logo`}
               className="w-12 h-12 rounded-lg object-cover border"
             />
@@ -62,13 +62,13 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
         
         <div className="flex items-center text-salary font-semibold mb-4">
           <DollarSign className="h-4 w-4 mr-1" />
-          <span>{formatSalary(job.salaryMin, job.salaryMax)}</span>
+          <span>{formatSalary(job.salary_min, job.salary_max)}</span>
           <span className="text-muted-foreground font-normal ml-1">per year</span>
         </div>
         
         <div className="flex flex-wrap gap-2 mb-3">
           <Badge variant="secondary" className="bg-benefit-tag text-benefit-tag-foreground">
-            {job.type}
+            {job.job_type}
           </Badge>
           {job.benefits.slice(0, 3).map((benefit) => (
             <Badge key={benefit} variant="outline" className="text-xs">
@@ -83,7 +83,7 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
         </div>
         
         <div className="text-sm text-muted-foreground">
-          Posted {formatDate(job.postedDate)}
+          Posted {formatDate(new Date(job.created_at))}
         </div>
       </CardContent>
     </Card>

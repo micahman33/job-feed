@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      jobs: {
+        Row: {
+          benefits: string[] | null
+          company: string
+          company_logo: string | null
+          created_at: string
+          description: string
+          id: string
+          job_type: string
+          location: string
+          salary_max: number | null
+          salary_min: number | null
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          benefits?: string[] | null
+          company: string
+          company_logo?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          job_type?: string
+          location: string
+          salary_max?: number | null
+          salary_min?: number | null
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          benefits?: string[] | null
+          company?: string
+          company_logo?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          job_type?: string
+          location?: string
+          salary_max?: number | null
+          salary_min?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

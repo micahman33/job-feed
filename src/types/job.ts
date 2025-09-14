@@ -3,13 +3,14 @@ export interface Job {
   title: string;
   company: string;
   location: string;
-  salaryMin: number;
-  salaryMax: number;
-  type: string; // full-time, part-time, contract
+  salary_min: number;
+  salary_max: number;
+  job_type: string;
   description: string;
   benefits: string[];
-  postedDate: Date;
-  companyLogo?: string;
+  created_at: string;
+  company_logo?: string;
+  user_id?: string;
 }
 
 export const AVAILABLE_BENEFITS = [
@@ -20,7 +21,15 @@ export const AVAILABLE_BENEFITS = [
   "Paid Training",
   "Remote Work",
   "Flexible Schedule",
-  "Stock Options"
+  "Stock Options",
+  "Commission Structure",
+  "Professional Development",
+  "Conference Budget",
+  "Creative Budget",
+  "On-call Bonus",
+  "Marketing Budget",
+  "Travel Reimbursement",
+  "Phone Allowance"
 ] as const;
 
 export type Benefit = typeof AVAILABLE_BENEFITS[number];

@@ -45,9 +45,9 @@ const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
                 <span className="font-semibold text-lg">{job.company}</span>
               </div>
             </div>
-            {job.companyLogo && (
+            {job.company_logo && (
               <img 
-                src={job.companyLogo} 
+                src={job.company_logo} 
                 alt={`${job.company} logo`}
                 className="w-16 h-16 rounded-lg object-cover border"
               />
@@ -61,17 +61,17 @@ const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
             </div>
             <div className="flex items-center text-salary font-semibold">
               <DollarSign className="h-4 w-4 mr-1" />
-              <span>{formatSalary(job.salaryMin, job.salaryMax)} per year</span>
+              <span>{formatSalary(job.salary_min, job.salary_max)} per year</span>
             </div>
             <div className="flex items-center text-muted-foreground">
               <Calendar className="h-4 w-4 mr-1" />
-              <span>Posted {formatDate(job.postedDate)}</span>
+              <span>Posted {formatDate(new Date(job.created_at))}</span>
             </div>
           </div>
           
           <div className="flex flex-wrap gap-2">
             <Badge className="bg-benefit-tag text-benefit-tag-foreground">
-              {job.type}
+              {job.job_type}
             </Badge>
             {job.benefits.map((benefit) => (
               <Badge key={benefit} variant="outline">

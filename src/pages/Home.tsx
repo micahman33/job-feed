@@ -7,48 +7,81 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, MapPin, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const Home = () => {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [selectedBenefits, setSelectedBenefits] = useState<string[]>([]);
+  const [selectedJobTypes, setSelectedJobTypes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load jobs from localStorage or use sample data
-    const storedJobs = localStorage.getItem('jobPosts');
-    if (storedJobs) {
-      const parsedJobs = JSON.parse(storedJobs).map((job: any) => ({
-        ...job,
-        postedDate: new Date(job.postedDate)
-      }));
-      // Combine with sample jobs and sort by date
-      const allJobs = [...sampleJobs, ...parsedJobs];
-      const last14Days = new Date();
-      last14Days.setDate(last14Days.getDate() - 14);
-      
-      const recentJobs = allJobs
-        .filter(job => job.postedDate >= last14Days)
-        .sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime());
-      
-      setJobs(recentJobs);
-    } else {
-      // Filter sample jobs to last 14 days and sort by newest
-      const last14Days = new Date();
-      last14Days.setDate(last14Days.getDate() - 14);
-      
-      const recentJobs = sampleJobs
-        .filter(job => job.postedDate >= last14Days)
-        .sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime());
-      
-      setJobs(recentJobs);
-    }
+    loadJobs();
   }, []);
+
+  const loadJobs = async () => {
+    try {
+      // Load jobs from Supabase
+      const { data: dbJobs, error } = await supabase
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading jobs:', error);
+        // Fall back to sample jobs
+        setJobs(sampleJobs);
+      } else {
+        // Combine database jobs with sample jobs to ensure minimum 6 jobs
+        const allJobs = [...(dbJobs || []), ...sampleJobs];
+        
+        // Filter to last 14 days and sort by newest
+        const last14Days = new Date();
+        last14Days.setDate(last14Days.getDate() - 14);
+        
+        const recentJobs = allJobs
+          .filter(job => new Date(job.created_at) >= last14Days)
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 50); // Limit to 50 jobs before pagination
+
+        // Ensure minimum 6 jobs are shown
+        const finalJobs = recentJobs.length >= 6 ? recentJobs : [...recentJobs, ...sampleJobs.slice(0, 6 - recentJobs.length)];
+        setJobs(finalJobs);
+      }
+    } catch (error) {
+      console.error('Error loading jobs:', error);
+      setJobs(sampleJobs);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleJobClick = (job: Job) => {
     setSelectedJob(job);
     setIsModalOpen(true);
+  };
+
+  const handleBenefitToggle = (benefit: string) => {
+    setSelectedBenefits(prev => 
+      prev.includes(benefit) 
+        ? prev.filter(b => b !== benefit)
+        : [...prev, benefit]
+    );
+  };
+
+  const handleJobTypeToggle = (type: string) => {
+    setSelectedJobTypes(prev => 
+      prev.includes(type) 
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    );
   };
 
   const filteredJobs = jobs.filter(job => {
@@ -59,11 +92,29 @@ const Home = () => {
     const matchesLocation = locationFilter === "" ||
       job.location.toLowerCase().includes(locationFilter.toLowerCase());
     
-    return matchesSearch && matchesLocation;
+    const matchesBenefits = selectedBenefits.length === 0 ||
+      selectedBenefits.some(benefit => job.benefits.includes(benefit));
+    
+    const matchesJobType = selectedJobTypes.length === 0 ||
+      selectedJobTypes.includes(job.job_type);
+    
+    return matchesSearch && matchesLocation && matchesBenefits && matchesJobType;
   });
 
   const uniqueLocations = Array.from(new Set(jobs.map(job => job.location)));
   const allBenefits = Array.from(new Set(jobs.flatMap(job => job.benefits)));
+  const jobTypes = ["Full-time", "Part-time", "Contract", "Internship"];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading jobs...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -87,7 +138,7 @@ const Home = () => {
                     placeholder="Job title, keywords, or company"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
                 <div className="flex-1 relative">
@@ -96,7 +147,7 @@ const Home = () => {
                     placeholder="City, state, or remote"
                     value={locationFilter}
                     onChange={(e) => setLocationFilter(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
                 <Button className="bg-primary hover:bg-primary-hover text-primary-foreground px-8">
@@ -119,24 +170,35 @@ const Home = () => {
                 Filter Jobs
               </h3>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div>
-                  <h4 className="font-medium text-foreground mb-2">Popular Benefits</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {allBenefits.slice(0, 6).map((benefit) => (
-                      <Badge key={benefit} variant="outline" className="text-xs cursor-pointer hover:bg-accent">
-                        {benefit}
-                      </Badge>
+                  <h4 className="font-medium text-foreground mb-3">Benefits</h4>
+                  <div className="space-y-2">
+                    {allBenefits.slice(0, 8).map((benefit) => (
+                      <div key={benefit} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={benefit}
+                          checked={selectedBenefits.includes(benefit)}
+                          onCheckedChange={() => handleBenefitToggle(benefit)}
+                        />
+                        <label htmlFor={benefit} className="text-sm text-muted-foreground cursor-pointer">
+                          {benefit}
+                        </label>
+                      </div>
                     ))}
                   </div>
                 </div>
                 
                 <div>
-                  <h4 className="font-medium text-foreground mb-2">Job Type</h4>
+                  <h4 className="font-medium text-foreground mb-3">Job Type</h4>
                   <div className="space-y-2">
-                    {["Full-time", "Part-time", "Contract", "Remote"].map((type) => (
+                    {jobTypes.map((type) => (
                       <div key={type} className="flex items-center space-x-2">
-                        <input type="checkbox" id={type} className="rounded" />
+                        <Checkbox
+                          id={type}
+                          checked={selectedJobTypes.includes(type)}
+                          onCheckedChange={() => handleJobTypeToggle(type)}
+                        />
                         <label htmlFor={type} className="text-sm text-muted-foreground cursor-pointer">
                           {type}
                         </label>
@@ -144,6 +206,22 @@ const Home = () => {
                     ))}
                   </div>
                 </div>
+
+                {(selectedBenefits.length > 0 || selectedJobTypes.length > 0) && (
+                  <div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setSelectedBenefits([]);
+                        setSelectedJobTypes([]);
+                      }}
+                      className="w-full"
+                    >
+                      Clear Filters
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -155,7 +233,7 @@ const Home = () => {
                 Recent Job Postings
               </h2>
               <p className="text-muted-foreground">
-                {filteredJobs.length} jobs posted in the last 14 days
+                {filteredJobs.length} jobs available
               </p>
             </div>
 
