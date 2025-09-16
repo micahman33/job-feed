@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Building2, MapPin, DollarSign, FileText, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { postJob } from "@/lib/jobApi";
 
 const PostJob = () => {
   const navigate = useNavigate();
@@ -65,55 +66,29 @@ const PostJob = () => {
     setIsSubmitting(true);
 
     try {
-      if (user) {
-        // User is authenticated, save to Supabase
-        const { error } = await supabase
-          .from('jobs')
-          .insert({
-            title: formData.title,
-            company: formData.company,
-            location: formData.location,
-            salary_min: parseInt(formData.salaryMin),
-            salary_max: parseInt(formData.salaryMax),
-            job_type: formData.type,
-            description: formData.description,
-            benefits: formData.benefits,
-            company_logo: formData.companyLogo || null,
-            user_id: user.id
-          });
+      // Use the API endpoint for all job postings
+      const jobData = {
+        title: formData.title,
+        company: formData.company,
+        location: formData.location,
+        salary_min: parseInt(formData.salaryMin),
+        salary_max: parseInt(formData.salaryMax),
+        job_type: formData.type,
+        description: formData.description,
+        benefits: formData.benefits,
+        company_logo: formData.companyLogo || null,
+        user_id: user?.id || null
+      };
 
-        if (error) {
-          throw error;
-        }
+      const result = await postJob(jobData);
 
+      if (result.success) {
         toast({
           title: "Job Posted Successfully!",
           description: "Your job posting is now live and visible to job seekers.",
         });
       } else {
-        // User not authenticated, save to localStorage
-        const newJob = {
-          id: Date.now().toString(),
-          title: formData.title,
-          company: formData.company,
-          location: formData.location,
-          salary_min: parseInt(formData.salaryMin),
-          salary_max: parseInt(formData.salaryMax),
-          job_type: formData.type,
-          description: formData.description,
-          benefits: formData.benefits,
-          created_at: new Date().toISOString(),
-          company_logo: formData.companyLogo || null
-        };
-
-        const existingJobs = JSON.parse(localStorage.getItem('jobPosts') || '[]');
-        existingJobs.push(newJob);
-        localStorage.setItem('jobPosts', JSON.stringify(existingJobs));
-
-        toast({
-          title: "Job Posted Successfully!",
-          description: "Your job posting is now live and visible to job seekers.",
-        });
+        throw new Error(result.error || 'Failed to post job');
       }
 
       // Navigate back to home

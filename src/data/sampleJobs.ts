@@ -43,7 +43,7 @@ Nice to Have:
 • Familiarity with cloud platforms (AWS, GCP, Azure)`,
     benefits: ["Health Insurance", "Dental Insurance", "401K", "Paid Time Off", "Stock Options"],
     created_at: getRandomDate(14),
-    company_logo: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=64&h=64&fit=crop&crop=center"
+    company_logo: "🚀"
   },
   {
     id: "2", 
@@ -80,7 +80,7 @@ What We Offer:
 • Collaborative and innovative work environment`,
     benefits: ["Health Insurance", "Dental Insurance", "401K", "Paid Time Off", "Flexible Schedule", "Stock Options"],
     created_at: getRandomDate(14),
-    company_logo: "https://images.unsplash.com/photo-1549923746-c502d488b3ea?w=64&h=64&fit=crop&crop=center"
+    company_logo: "💡"
   },
   {
     id: "3",
@@ -118,7 +118,7 @@ Benefits:
 • Retirement planning with company matching`,
     benefits: ["Remote Work", "Health Insurance", "Dental Insurance", "401K", "Flexible Schedule", "Paid Training"],
     created_at: getRandomDate(14),
-    company_logo: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=64&h=64&fit=crop&crop=center"
+    company_logo: "📊"
   },
   {
     id: "4",
@@ -156,7 +156,7 @@ Why Join Us:
 • Flexible PTO policy`,
     benefits: ["Health Insurance", "Dental Insurance", "Paid Time Off", "Paid Training", "Flexible Schedule"],
     created_at: getRandomDate(14),
-    company_logo: "https://images.unsplash.com/photo-1558655146-364adaf25c24?w=64&h=64&fit=crop&crop=center"
+    company_logo: "🎨"
   },
   {
     id: "5",
@@ -195,7 +195,7 @@ Benefits Package:
 • Stock options program`,
     benefits: ["Health Insurance", "Dental Insurance", "401K", "Paid Time Off", "Stock Options", "Remote Work"],
     created_at: getRandomDate(14),
-    company_logo: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=64&h=64&fit=crop&crop=center"
+    company_logo: "☁️"
   },
   {
     id: "6",
@@ -234,6 +234,6 @@ What We Offer:
 • Career advancement opportunities`,
     benefits: ["Health Insurance", "Dental Insurance", "Paid Time Off", "Paid Training"],
     created_at: getRandomDate(14),
-    company_logo: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=64&h=64&fit=crop&crop=center"
+    company_logo: "📈"
   }
 ];

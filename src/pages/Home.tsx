@@ -26,6 +26,16 @@ const Home = () => {
     loadJobs();
   }, []);
 
+  // Reload jobs when the page regains focus (e.g., returning from PostJob page)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadJobs();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   const loadJobs = async () => {
     try {
       // Load jobs from Supabase
@@ -34,13 +44,18 @@ const Home = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
+      // Load jobs from localStorage (for non-authenticated users)
+      const localStorageJobs = JSON.parse(localStorage.getItem('jobPosts') || '[]');
+      console.log('Loaded localStorage jobs:', localStorageJobs);
+
       if (error) {
         console.error('Error loading jobs:', error);
-        // Fall back to sample jobs
-        setJobs(sampleJobs);
+        // Fall back to localStorage jobs + sample jobs
+        const allJobs = [...localStorageJobs, ...sampleJobs];
+        setJobs(allJobs);
       } else {
-        // Combine database jobs with sample jobs to ensure minimum 6 jobs
-        const allJobs = [...(dbJobs || []), ...sampleJobs];
+        // Combine database jobs, localStorage jobs, and sample jobs
+        const allJobs = [...(dbJobs || []), ...localStorageJobs, ...sampleJobs];
         
         // Filter to last 14 days and sort by newest
         const last14Days = new Date();
@@ -57,7 +72,9 @@ const Home = () => {
       }
     } catch (error) {
       console.error('Error loading jobs:', error);
-      setJobs(sampleJobs);
+      // Fall back to localStorage jobs + sample jobs
+      const localStorageJobs = JSON.parse(localStorage.getItem('jobPosts') || '[]');
+      setJobs([...localStorageJobs, ...sampleJobs]);
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,311 @@
+openapi: 3.0.3
+info:
+  title: Job Feed API
+  description: API for posting jobs to the Job Feed platform
+  version: 1.0.0
+  contact:
+    name: Job Feed API Support
+    email: support@jobfeed.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://imaiixiyaynmtcfaaeea.supabase.co/functions/v1
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /post-job:
+    post:
+      summary: Post a new job
+      description: Create a new job posting on the job board
+      operationId: postJob
+      tags:
+        - Jobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobPostRequest'
+            examples:
+              full_time_job:
+                summary: Full-time Software Engineer
+                value:
+                  title: "Senior Software Engineer"
+                  company: "TechCorp Inc."
+                  location: "San Francisco, CA"
+                  salary_min: 120000
+                  salary_max: 180000
+                  job_type: "Full-time"
+                  description: "We are looking for a senior software engineer to join our growing team. You will be responsible for developing scalable web applications and mentoring junior developers."
+                  benefits: ["Health Insurance", "Dental Insurance", "401K", "Paid Time Off", "Remote Work"]
+                  company_logo: "🚀"
+              remote_job:
+                summary: Remote Frontend Developer
+                value:
+                  title: "Frontend Developer"
+                  company: "WebStudio"
+                  location: "Remote"
+                  salary_min: 70000
+                  salary_max: 110000
+                  job_type: "Full-time"
+                  description: "Looking for a talented frontend developer to create amazing user experiences. Experience with React and modern JavaScript required."
+                  benefits: ["Health Insurance", "Remote Work", "Professional Development"]
+                  company_logo: "🎨"
+              contract_job:
+                summary: Contract Data Scientist
+                value:
+                  title: "Data Scientist"
+                  company: "DataFlow"
+                  location: "Austin, TX"
+                  salary_min: 95000
+                  salary_max: 150000
+                  job_type: "Contract"
+                  description: "Analyze complex datasets and build machine learning models to drive business insights."
+                  benefits: ["Health Insurance", "401K", "Stock Options"]
+                  company_logo: "📊"
+      responses:
+        '201':
+          description: Job posted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPostResponse'
+              examples:
+                success:
+                  summary: Successful job post
+                  value:
+                    success: true
+                    message: "Job posted successfully"
+                    job:
+                      id: "4dcd8f2d-e52b-47ea-8ba9-49c51ed905cb"
+                      title: "Senior Software Engineer"
+                      company: "TechCorp Inc."
+                      location: "San Francisco, CA"
+                      salary_min: 120000
+                      salary_max: 180000
+                      job_type: "Full-time"
+                      description: "We are looking for a senior software engineer..."
+                      benefits: ["Health Insurance", "Dental Insurance", "401K"]
+                      company_logo: "🚀"
+                      user_id: null
+                      created_at: "2024-01-15T10:30:00.000Z"
+                      updated_at: "2024-01-15T10:30:00.000Z"
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_fields:
+                  summary: Missing required fields
+                  value:
+                    error: "Missing required fields"
+                    missing_fields: ["title", "company", "location"]
+                    details: "Please provide all required fields"
+                invalid_salary:
+                  summary: Invalid salary range
+                  value:
+                    error: "Minimum salary cannot be greater than maximum salary"
+                    details: "salary_min must be less than or equal to salary_max"
+                invalid_job_type:
+                  summary: Invalid job type
+                  value:
+                    error: "Invalid job type"
+                    details: "job_type must be one of: Full-time, Part-time, Contract, Internship"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                server_error:
+                  summary: Server error
+                  value:
+                    error: "Internal server error"
+                    details: "An unexpected error occurred while processing your request"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Use the provided API key as the Bearer token.
+        
+        API Key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltYWlpeGl5YXlubXRjZmFhZWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4ODI4MDQsImV4cCI6MjA3MzQ1ODgwNH0.h56G1loDTn_b6L875cqm91nGfKaDcvRg9I3QJZjFrS0`
+        
+        Example: `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+  schemas:
+    JobPostRequest:
+      type: object
+      required:
+        - title
+        - company
+        - location
+        - salary_min
+        - salary_max
+        - job_type
+        - description
+      properties:
+        title:
+          type: string
+          description: Job title
+          example: "Senior Software Engineer"
+          minLength: 1
+          maxLength: 200
+        company:
+          type: string
+          description: Company name
+          example: "TechCorp Inc."
+          minLength: 1
+          maxLength: 100
+        location:
+          type: string
+          description: Job location
+          example: "San Francisco, CA"
+          minLength: 1
+          maxLength: 100
+        salary_min:
+          type: integer
+          description: Minimum salary in USD
+          example: 120000
+          minimum: 0
+        salary_max:
+          type: integer
+          description: Maximum salary in USD
+          example: 180000
+          minimum: 0
+        job_type:
+          type: string
+          description: Type of employment
+          enum: ["Full-time", "Part-time", "Contract", "Internship"]
+          example: "Full-time"
+        description:
+          type: string
+          description: Detailed job description
+          example: "We are looking for a senior software engineer to join our growing team..."
+          minLength: 10
+          maxLength: 5000
+        benefits:
+          type: array
+          description: List of benefits offered
+          items:
+            type: string
+          example: ["Health Insurance", "401K", "Remote Work"]
+        company_logo:
+          type: string
+          description: Company logo (emoji or URL)
+          example: "🚀"
+          maxLength: 500
+        user_id:
+          type: string
+          description: User ID for authenticated posts (optional)
+          example: "user-123"
+          nullable: true
+
+    JobPostResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+          example: true
+        message:
+          type: string
+          description: Success message
+          example: "Job posted successfully"
+        job:
+          $ref: '#/components/schemas/Job'
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique job identifier
+          example: "4dcd8f2d-e52b-47ea-8ba9-49c51ed905cb"
+        title:
+          type: string
+          description: Job title
+          example: "Senior Software Engineer"
+        company:
+          type: string
+          description: Company name
+          example: "TechCorp Inc."
+        location:
+          type: string
+          description: Job location
+          example: "San Francisco, CA"
+        salary_min:
+          type: integer
+          description: Minimum salary in USD
+          example: 120000
+        salary_max:
+          type: integer
+          description: Maximum salary in USD
+          example: 180000
+        job_type:
+          type: string
+          description: Type of employment
+          example: "Full-time"
+        description:
+          type: string
+          description: Job description
+          example: "We are looking for a senior software engineer..."
+        benefits:
+          type: array
+          description: List of benefits
+          items:
+            type: string
+          example: ["Health Insurance", "401K", "Remote Work"]
+        company_logo:
+          type: string
+          description: Company logo
+          example: "🚀"
+          nullable: true
+        user_id:
+          type: string
+          description: User ID who posted the job
+          example: "user-123"
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          description: When the job was created
+          example: "2024-01-15T10:30:00.000Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: When the job was last updated
+          example: "2024-01-15T10:30:00.000Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Missing required fields"
+        details:
+          type: string
+          description: Additional error details
+          example: "Please provide all required fields"
+        missing_fields:
+          type: array
+          description: List of missing required fields (only for validation errors)
+          items:
+            type: string
+          example: ["title", "company"]
+
+tags:
+  - name: Jobs
+    description: Job posting operations

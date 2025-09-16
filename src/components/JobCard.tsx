@@ -22,11 +22,34 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
   const formatDate = (date: Date) => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
     
-    if (diffDays === 1) return "1 day ago";
+    // If posted within the last hour
+    if (diffMinutes < 60) {
+      if (diffMinutes < 1) return "Just now";
+      return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+    }
+    
+    // If posted within the last 24 hours
+    if (diffHours < 24) {
+      return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+    }
+    
+    // If posted today (same calendar day)
+    if (diffDays === 0) return "Today";
+    
+    // If posted yesterday
+    if (diffDays === 1) return "Yesterday";
+    
+    // If posted within the last week
     if (diffDays <= 7) return `${diffDays} days ago`;
+    
+    // If posted within the last 2 weeks
     if (diffDays <= 14) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+    
+    // For older posts, show the actual date
     return date.toLocaleDateString();
   };
 
@@ -46,13 +69,35 @@ const JobCard = ({ job, onClick }: JobCardProps) => {
               <span className="font-medium">{job.company}</span>
             </div>
           </div>
-          {job.company_logo && (
-            <img 
-              src={job.company_logo} 
-              alt={`${job.company} logo`}
-              className="w-12 h-12 rounded-lg object-cover border"
-            />
-          )}
+          <div className="w-12 h-12 rounded-lg border bg-muted flex items-center justify-center overflow-hidden">
+            {job.company_logo ? (
+              // Check if it's an emoji (single character or emoji) vs URL
+              job.company_logo.length <= 4 && !job.company_logo.startsWith('http') ? (
+                <span className="text-2xl">
+                  {job.company_logo}
+                </span>
+              ) : (
+                <img 
+                  src={job.company_logo} 
+                  alt={`${job.company} logo`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to company initials if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `<span class="text-sm font-semibold text-muted-foreground">${job.company.substring(0, 2).toUpperCase()}</span>`;
+                    }
+                  }}
+                />
+              )
+            ) : (
+              <span className="text-sm font-semibold text-muted-foreground">
+                {job.company.substring(0, 2).toUpperCase()}
+              </span>
+            )}
+          </div>
         </div>
         
         <div className="flex items-center text-muted-foreground mb-3">

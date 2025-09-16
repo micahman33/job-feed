@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Posting API Test Tool</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f8fafc;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .success { 
+            background-color: #f0fdf4; 
+            border-color: #22c55e; 
+            color: #166534;
+        }
+        .error { 
+            background-color: #fef2f2; 
+            border-color: #ef4444; 
+            color: #dc2626;
+        }
+        button { 
+            padding: 12px 24px; 
+            margin: 8px; 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        button:hover { 
+            background: #2563eb; 
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        pre { 
+            background: #f1f5f9; 
+            padding: 16px; 
+            border-radius: 8px; 
+            overflow-x: auto; 
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+        input, textarea, select { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: 1px solid #d1d5db; 
+            border-radius: 8px; 
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .form-group { 
+            margin: 16px 0; 
+        }
+        label { 
+            display: block; 
+            font-weight: 600; 
+            margin-bottom: 6px; 
+            color: #374151;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background-color: #22c55e; }
+        .status-error { background-color: #ef4444; }
+        .status-pending { background-color: #f59e0b; }
+        .api-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .api-info h3 {
+            margin: 0 0 8px 0;
+            color: #1e40af;
+        }
+        .api-info code {
+            background: #dbeafe;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 Job Posting API Test Tool</h1>
+        <p>Test your job posting APIs with real data</p>
+    </div>
+
+    <div class="api-info">
+        <h3>📡 API Endpoints</h3>
+        <p><strong>Edge Function API:</strong> <code>POST /functions/v1/post-job</code></p>
+        <p><strong>Direct Database API:</strong> <code>POST /rest/v1/jobs</code></p>
+        <p><strong>Fetch Jobs:</strong> <code>GET /rest/v1/jobs</code></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🚀 Test 1: Edge Function API (Recommended)</h2>
+        <p>Tests the custom Edge Function API with validation and error handling.</p>
+        <button onclick="testEdgeFunction()" id="edgeBtn">Test Edge Function API</button>
+        <div id="edge-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>💾 Test 2: Direct Database API</h2>
+        <p>Tests the direct Supabase REST API insertion (bypasses custom validation).</p>
+        <button onclick="testDirectDB()" id="directBtn">Test Direct Database API</button>
+        <div id="direct-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>✏️ Test 3: Custom Job Data</h2>
+        <p>Test with your own job data:</p>
+        
+        <div class="grid">
+            <div class="form-group">
+                <label>Job Title:</label>
+                <input type="text" id="title" value="API Test Developer" />
+            </div>
+            
+            <div class="form-group">
+                <label>Company:</label>
+                <input type="text" id="company" value="TestCorp" />
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" id="location" value="Remote" />
+            </div>
+            
+            <div class="form-group">
+                <label>Job Type:</label>
+                <select id="jobType">
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Internship">Internship</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="form-group">
+                <label>Min Salary (USD):</label>
+                <input type="number" id="salaryMin" value="80000" />
+            </div>
+            
+            <div class="form-group">
+                <label>Max Salary (USD):</label>
+                <input type="number" id="salaryMax" value="120000" />
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Description:</label>
+            <textarea id="description" rows="4">This is a test job posting created via API to demonstrate external integration capabilities. The job involves working with modern web technologies and APIs.</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Benefits (comma-separated):</label>
+            <input type="text" id="benefits" value="Health Insurance, 401K, Remote Work, API Testing, Professional Development" />
+        </div>
+        
+        <div class="form-group">
+            <label>Company Logo (emoji or URL):</label>
+            <input type="text" id="companyLogo" value="🧪" />
+        </div>
+        
+        <button onclick="testCustomJob()" id="customBtn">Test Custom Job</button>
+        <div id="custom-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test 4: View Recent Jobs</h2>
+        <p>Fetch and display the most recent jobs from the database:</p>
+        <button onclick="fetchJobs()" id="fetchBtn">Fetch Recent Jobs</button>
+        <div id="jobs-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Test 5: Bulk Operations</h2>
+        <p>Test posting multiple jobs at once:</p>
+        <button onclick="testBulkJobs()" id="bulkBtn">Post 3 Test Jobs</button>
+        <div id="bulk-result"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://imaiixiyaynmtcfaaeea.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltYWlpeGl5YXlubXRjZmFhZWVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4ODI4MDQsImV4cCI6MjA3MzQ1ODgwNH0.h56G1loDTn_b6L875cqm91nGfKaDcvRg9I3QJZjFrS0';
+
+        function setButtonLoading(buttonId, loading) {
+            const btn = document.getElementById(buttonId);
+            btn.disabled = loading;
+            btn.textContent = loading ? 'Testing...' : btn.textContent.replace('Testing...', '');
+        }
+
+        function showResult(elementId, success, data, title = '') {
+            const element = document.getElementById(elementId);
+            element.className = success ? 'success' : 'error';
+            
+            const statusIcon = success ? 'status-success' : 'status-error';
+            const statusText = success ? 'SUCCESS' : 'ERROR';
+            
+            element.innerHTML = `
+                <div style="margin-bottom: 12px;">
+                    <span class="status-indicator ${statusIcon}"></span>
+                    <strong>${statusText}</strong> ${title}
+                </div>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+
+        async function testEdgeFunction() {
+            setButtonLoading('edgeBtn', true);
+            
+            const jobData = {
+                title: "Edge Function Test Developer",
+                company: "TestCorp",
+                location: "Remote",
+                salary_min: 80000,
+                salary_max: 120000,
+                job_type: "Full-time",
+                description: "This is a test job posting created via Edge Function API with full validation.",
+                benefits: ["Health Insurance", "401K", "Remote Work", "Edge Function Testing"],
+                company_logo: "⚡"
+            };
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/post-job`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify(jobData)
+                });
+
+                const result = await response.json();
+                showResult('edge-result', response.ok, result, '- Edge Function API');
+            } catch (error) {
+                showResult('edge-result', false, { error: error.message }, '- Edge Function API');
+            } finally {
+                setButtonLoading('edgeBtn', false);
+            }
+        }
+
+        async function testDirectDB() {
+            setButtonLoading('directBtn', true);
+            
+            const jobData = {
+                title: "Direct DB Test Developer",
+                company: "TestCorp",
+                location: "Remote",
+                salary_min: 80000,
+                salary_max: 120000,
+                job_type: "Full-time",
+                description: "This is a test job posting created via direct database API.",
+                benefits: ["Health Insurance", "401K", "Remote Work"],
+                company_logo: "🔧"
+            };
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify(jobData)
+                });
+
+                const result = await response.json();
+                showResult('direct-result', response.ok, result, '- Direct Database API');
+            } catch (error) {
+                showResult('direct-result', false, { error: error.message }, '- Direct Database API');
+            } finally {
+                setButtonLoading('directBtn', false);
+            }
+        }
+
+        async function testCustomJob() {
+            setButtonLoading('customBtn', true);
+            
+            const jobData = {
+                title: document.getElementById('title').value,
+                company: document.getElementById('company').value,
+                location: document.getElementById('location').value,
+                salary_min: parseInt(document.getElementById('salaryMin').value),
+                salary_max: parseInt(document.getElementById('salaryMax').value),
+                job_type: document.getElementById('jobType').value,
+                description: document.getElementById('description').value,
+                benefits: document.getElementById('benefits').value.split(',').map(b => b.trim()),
+                company_logo: document.getElementById('companyLogo').value
+            };
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/post-job`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify(jobData)
+                });
+
+                const result = await response.json();
+                showResult('custom-result', response.ok, result, '- Custom Job Data');
+            } catch (error) {
+                showResult('custom-result', false, { error: error.message }, '- Custom Job Data');
+            } finally {
+                setButtonLoading('customBtn', false);
+            }
+        }
+
+        async function fetchJobs() {
+            setButtonLoading('fetchBtn', true);
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/jobs?select=*&order=created_at.desc&limit=10`, {
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'apikey': SUPABASE_ANON_KEY
+                    }
+                });
+
+                const result = await response.json();
+                showResult('jobs-result', response.ok, result, `- Found ${result.length} recent jobs`);
+            } catch (error) {
+                showResult('jobs-result', false, { error: error.message }, '- Fetch Jobs');
+            } finally {
+                setButtonLoading('fetchBtn', false);
+            }
+        }
+
+        async function testBulkJobs() {
+            setButtonLoading('bulkBtn', true);
+            
+            const jobs = [
+                {
+                    title: "Frontend Developer",
+                    company: "WebStudio",
+                    location: "San Francisco, CA",
+                    salary_min: 70000,
+                    salary_max: 110000,
+                    job_type: "Full-time",
+                    description: "Looking for a talented frontend developer to create amazing user experiences.",
+                    benefits: ["Health Insurance", "Remote Work", "Professional Development"],
+                    company_logo: "🎨"
+                },
+                {
+                    title: "Backend Engineer",
+                    company: "DataFlow",
+                    location: "Austin, TX",
+                    salary_min: 90000,
+                    salary_max: 140000,
+                    job_type: "Full-time",
+                    description: "Build scalable backend systems and APIs for our growing platform.",
+                    benefits: ["Health Insurance", "401K", "Stock Options"],
+                    company_logo: "⚙️"
+                },
+                {
+                    title: "DevOps Specialist",
+                    company: "CloudTech",
+                    location: "Seattle, WA",
+                    salary_min: 100000,
+                    salary_max: 160000,
+                    job_type: "Full-time",
+                    description: "Manage our cloud infrastructure and deployment pipelines.",
+                    benefits: ["Health Insurance", "401K", "Remote Work", "On-call Bonus"],
+                    company_logo: "☁️"
+                }
+            ];
+
+            const results = [];
+            
+            for (let i = 0; i < jobs.length; i++) {
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/functions/v1/post-job`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify(jobs[i])
+                    });
+
+                    const result = await response.json();
+                    results.push({
+                        job: jobs[i].title,
+                        success: response.ok,
+                        result: result
+                    });
+                } catch (error) {
+                    results.push({
+                        job: jobs[i].title,
+                        success: false,
+                        error: error.message
+                    });
+                }
+            }
+
+            const successCount = results.filter(r => r.success).length;
+            showResult('bulk-result', successCount === jobs.length, results, `- ${successCount}/${jobs.length} jobs posted successfully`);
+            setButtonLoading('bulkBtn', false);
+        }
+
+        // Auto-fetch jobs on page load
+        window.addEventListener('load', () => {
+            fetchJobs();
+        });
+    </script>
+</body>
+</html>
