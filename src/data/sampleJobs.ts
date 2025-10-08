@@ -1,8 +1,8 @@
 import { Job } from "@/types/job";
 
-const getRandomDate = (days: number) => {
+const getSequentialDate = (daysAgo: number) => {
   const date = new Date();
-  date.setDate(date.getDate() - Math.floor(Math.random() * days));
+  date.setDate(date.getDate() - daysAgo);
   return date.toISOString();
 };
 
@@ -42,7 +42,7 @@ Nice to Have:
 • Experience with design systems and component libraries
 • Familiarity with cloud platforms (AWS, GCP, Azure)`,
     benefits: ["Health Insurance", "Dental Insurance", "401K", "Paid Time Off", "Stock Options"],
-    created_at: getRandomDate(14),
+    created_at: getSequentialDate(1),
     company_logo: "🚀"
   },
   {
@@ -79,7 +79,7 @@ What We Offer:
 • Professional development opportunities
 • Collaborative and innovative work environment`,
     benefits: ["Health Insurance", "Dental Insurance", "401K", "Paid Time Off", "Flexible Schedule", "Stock Options"],
-    created_at: getRandomDate(14),
+    created_at: getSequentialDate(2),
     company_logo: "💡"
   },
   {
@@ -117,7 +117,7 @@ Benefits:
 • Top-tier health and dental coverage
 • Retirement planning with company matching`,
     benefits: ["Remote Work", "Health Insurance", "Dental Insurance", "401K", "Flexible Schedule", "Paid Training"],
-    created_at: getRandomDate(14),
+    created_at: getSequentialDate(3),
     company_logo: "📊"
   },
   {
@@ -155,7 +155,7 @@ Why Join Us:
 • Comprehensive benefits package
 • Flexible PTO policy`,
     benefits: ["Health Insurance", "Dental Insurance", "Paid Time Off", "Paid Training", "Flexible Schedule"],
-    created_at: getRandomDate(14),
+    created_at: getSequentialDate(4),
     company_logo: "🎨"
   },
   {
@@ -194,7 +194,7 @@ Benefits Package:
 • Professional development budget
 • Stock options program`,
     benefits: ["Health Insurance", "Dental Insurance", "401K", "Paid Time Off", "Stock Options", "Remote Work"],
-    created_at: getRandomDate(14),
+    created_at: getSequentialDate(5),
     company_logo: "☁️"
   },
   {
@@ -233,7 +233,7 @@ What We Offer:
 • Fun and creative work environment
 • Career advancement opportunities`,
     benefits: ["Health Insurance", "Dental Insurance", "Paid Time Off", "Paid Training"],
-    created_at: getRandomDate(14),
+    created_at: getSequentialDate(6),
     company_logo: "📈"
   }
 ];

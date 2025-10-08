@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, DollarSign, Building2, Calendar } from "lucide-react";
+import { formatTextWithLineBreaks } from "@/lib/utils";
 
 interface JobDetailsModalProps {
   job: Job | null;
@@ -137,7 +138,7 @@ const JobDetailsModal = ({ job, isOpen, onClose }: JobDetailsModalProps) => {
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-3">Job Description</h3>
             <div className="prose prose-sm max-w-none text-muted-foreground">
-              <div className="whitespace-pre-wrap leading-relaxed">{job.description}</div>
+              <div className="whitespace-pre-wrap leading-relaxed">{formatTextWithLineBreaks(job.description)}</div>
             </div>
           </div>
           

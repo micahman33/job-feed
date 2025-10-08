@@ -2,11 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AVAILABLE_BENEFITS } from "@/types/job";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -183,17 +181,19 @@ const PostJob = () => {
                 </div>
                 <div>
                   <Label htmlFor="type">Job Type *</Label>
-                  <Select onValueChange={(value) => handleInputChange('type', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select job type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Full-time">Full-time</SelectItem>
-                      <SelectItem value="Part-time">Part-time</SelectItem>
-                      <SelectItem value="Contract">Contract</SelectItem>
-                      <SelectItem value="Internship">Internship</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    id="type"
+                    value={formData.type}
+                    onChange={(e) => handleInputChange('type', e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    required
+                  >
+                    <option value="">Select job type</option>
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Internship">Internship</option>
+                  </select>
                 </div>
               </div>
             </CardContent>
@@ -246,12 +246,13 @@ const PostJob = () => {
             <CardContent>
               <div>
                 <Label htmlFor="description">Description *</Label>
-                <Textarea
+                <textarea
                   id="description"
                   placeholder="Provide a detailed job description including responsibilities, requirements, and qualifications..."
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={8}
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 />
               </div>
