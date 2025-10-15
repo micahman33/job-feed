@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "./", // Use relative paths for assets
+  base: "/", // Use absolute paths for assets (better for subdirectory deployment)
   build: {
     assetsDir: "assets",
     rollupOptions: {

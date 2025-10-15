@@ -1,0 +1,41 @@
+# React SPA .htaccess for subdirectory deployment
+# This file handles client-side routing for React applications
+
+# Enable rewrite engine
+RewriteEngine On
+
+# Handle static assets with proper caching
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 1 year"
+    Header set Cache-Control "public, immutable"
+</FilesMatch>
+
+# Handle CSS files
+<FilesMatch "\.css$">
+    Header set Content-Type "text/css"
+</FilesMatch>
+
+# Handle JS files  
+<FilesMatch "\.js$">
+    Header set Content-Type "application/javascript"
+</FilesMatch>
+
+# Handle API routes (if any) - let them pass through
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^api/(.*)$ - [L]
+
+# Handle static assets - let them pass through
+RewriteCond %{REQUEST_URI} ^/assets/
+RewriteRule ^assets/(.*)$ - [L]
+
+# Handle other static files
+RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$
+RewriteRule ^(.*)$ - [L]
+
+# Fallback to index.html for SPA routing
+# This ensures all routes are handled by React Router
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
