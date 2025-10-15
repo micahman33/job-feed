@@ -18,7 +18,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/jobfeed">
           <div className="min-h-screen bg-background">
             <Header />
             <Routes>

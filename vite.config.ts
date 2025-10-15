@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "/", // Use absolute paths for assets (better for subdirectory deployment)
+  base: "/jobfeed/", // Use subdirectory path for deployment
   build: {
     assetsDir: "assets",
     rollupOptions: {

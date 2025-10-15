@@ -33,9 +33,13 @@ RewriteRule ^assets/(.*)$ - [L]
 RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$
 RewriteRule ^(.*)$ - [L]
 
+# Handle direct access to index.html - redirect to clean URL for better UX
+RewriteCond %{THE_REQUEST} \s/+jobfeed/index\.html[\s?] [NC]
+RewriteRule ^index\.html$ /jobfeed/ [R=301,L]
+
 # Fallback to index.html for SPA routing
 # This ensures all routes are handled by React Router
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.html [L]
+RewriteRule . /jobfeed/index.html [L]
 
